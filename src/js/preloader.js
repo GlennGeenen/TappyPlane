@@ -1,0 +1,48 @@
+(function () {
+	'use strict';
+
+	function Preloader() {
+		this.asset = null;
+		this.ready = false;
+	}
+
+	Preloader.prototype = {
+
+		preload: function () {
+			this.asset = this.add.sprite(this.game.width * 0.5, this.game.height * 0.5, 'preloader');
+			this.asset.anchor.setTo(0.5, 0.5);
+
+			this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
+			this.load.setPreloadSprite(this.asset);
+
+			this.load.image('background', 'assets/background.png');
+			this.load.image('block', 'assets/block.png');
+			this.load.image('puffSmall', 'assets/puffSmall.png');
+			this.load.image('starBronze', 'assets/starBronze.png');
+			this.load.image('starSilver', 'assets/starSilver.png');
+			this.load.image('starGold', 'assets/starGold.png');
+			this.load.image('explosion', 'assets/explosion.png');
+
+			this.load.spritesheet('plane', 'assets/plane.png', 88, 73, 3);
+
+		},
+
+		create: function () {
+			this.asset.cropEnabled = false;
+		},
+
+		update: function () {
+			if (!!this.ready) {
+				this.game.state.start('menu');
+			}
+		},
+
+		onLoadComplete: function () {
+			this.ready = true;
+		}
+	};
+
+	window['tappyplane'] = window['tappyplane'] || {};
+	window['tappyplane'].Preloader = Preloader;
+
+}());
