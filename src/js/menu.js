@@ -1,44 +1,88 @@
 (function () {
-	'use strict';
+    'use strict';
 
-	function Menu() {
-		this.titleTxt = null;
-		this.startTxt = null;
-	}
+    function Menu() {
+        this.titleTxt = null;
+        this.startTxt = null;
+        this.score = 0;
+        this.highScore = 0;
+    }
 
-	Menu.prototype = {
+    Menu.prototype = {
 
-		create: function () {
-			var x = this.game.width * 0.5;
-			var y = this.game.height * 0.5;
+        create: function () {
 
-			var text = this.add.text(x, y, 'TappyPlane', {
-				font: '65px Arial',
-				fill: '#ffe200',
-				align: 'center'
-			});
-			text.anchor.set(0.5);
+            this.addTitles();
+            this.addScore();
 
-			text = this.add.text(x, y + 100, 'tap to start', {
-				font: '48px Arial',
-				fill: '#ffffff',
-				align: 'center'
-			});
-			text.anchor.set(0.5);
+            this.input.onDown.add(this.onDown, this);
+        },
 
-			this.input.onDown.add(this.onDown, this);
-		},
+        addTitles: function () {
 
-		update: function () {
+            var text = this.add.text(this.game.width * 0.5, 200, 'tap/click', {
+                font: '42px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            text.anchor.set(0.5);
 
-		},
+            text = this.add.text(this.game.width * 0.5, 100, 'TappyPlane', {
+                font: '68px Arial',
+                fill: '#ffe200',
+                align: 'center'
+            });
+            text.anchor.set(0.5);
 
-		onDown: function () {
-			this.game.state.start('game');
-		}
-	};
+            text = this.add.text(this.game.width * 0.333, 500, 'High Score', {
+                font: '48px Arial',
+                fill: '#ffe200',
+                align: 'center'
+            });
+            text.anchor.set(0.5);
 
-	window['tappyplane'] = window['tappyplane'] || {};
-	window['tappyplane'].Menu = Menu;
+            text = this.add.text(this.game.width * 0.666, 500, 'Your Score', {
+                font: '48px Arial',
+                fill: '#ffe200',
+                align: 'center'
+            });
+            text.anchor.set(0.5);
+        },
+
+        addScore: function () {
+
+            if (localStorage.HighScore) {
+                this.highScore = localStorage.HighScore;
+            }
+            if (this.score > this.highScore) {
+                localStorage.HighScore = this.score;
+                this.highScore = this.score;
+            }
+
+            var style = {
+                font: '42px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            };
+
+            var text = this.add.text(this.game.width * 0.333, 560, this.highScore, style);
+            text.anchor.set(0.5);
+
+            text = this.add.text(this.game.width * 0.666, 560, this.score, style);
+            text.anchor.set(0.5);
+
+        },
+
+        update: function () {
+
+        },
+
+        onDown: function () {
+            this.game.state.start('game');
+        }
+    };
+
+    window['tappyplane'] = window['tappyplane'] || {};
+    window['tappyplane'].Menu = Menu;
 
 }());
