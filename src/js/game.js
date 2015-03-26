@@ -7,7 +7,6 @@
         this.emitter = null;
         this.lastX = 0;
         this.lastY = 0;
-        this.playerY = 2;
     }
 
     Game.prototype = {
@@ -15,7 +14,6 @@
         create: function () {
 
             this.gameOver = false;
-            this.physics.startSystem(Phaser.Physics.ARCADE);
 
             this.add.sprite(0, 0, 'background');
 
@@ -25,8 +23,7 @@
             this.createInterface();
 
             this.time.events.loop(250, this.updateScore, this);
-            this.input.onDown.add(this.onInputDown, this);
-            this.input.onUp.add(this.onInputUp, this);
+          
         },
 
         createPlane: function () {
@@ -34,7 +31,7 @@
             this.player.anchor.set(0.5);
             this.player.animations.add('fly');
             this.player.animations.play('fly', 50, true);
-            this.physics.enable(this.player, Phaser.Physics.ARCADE);
+            this.player.g = 0;
         },
 
         createEmitter: function () {
@@ -55,22 +52,22 @@
             this.blocks = this.add.group();
 
             this.lastX = 0;
-            this.lastY = 200 + Math.random() * 100;
+            this.lastY = 300 + Math.random() * 100;
 
-            for (var i = 0; i < 23; ++i) {
+            for (var i = 0; i < 40; ++i) {
 
                 this.lastX = i * 50;
 
                 this.computeNextY();
 
-                if (i === 4) {
+                if (i === 12) {
                     this.player.y = this.lastY + 150;
                 }
 
                 var block = this.blocks.create(this.lastX, this.lastY, 'block');
                 block.anchor.setTo(0.5, 1.0);
 
-                block = this.blocks.create(this.lastX, this.lastY + (250 + Math.random() * 150), 'block');
+                block = this.blocks.create(this.lastX, this.lastY + (350 + Math.random() * 150), 'block');
                 block.anchor.setTo(0.5, 0.0);
             }
 
@@ -89,9 +86,24 @@
         update: function () {
 
             if (!this.gameOver) {
-
-                this.player.body.velocity.y += this.playerY;
-                this.player.angle = this.player.body.velocity.y * 0.1;
+              
+              
+              if(this.game.kinectbody) {
+                var joints = this.game.kinectbody.Joints;
+                
+                if(joints.HandLeft.Position.Z > joints.SpineMid.Position.Z - 0.3 && joints.HandRight.Position.Z > joints.SpineMid.Position.Z - 0.3) {
+                  this.player.g  = -30;
+                } else {
+                  this.player.g  = 30;
+                }
+                
+              }
+              
+                var deltaTime = this.time.elapsed / 1000;
+              
+                this.player.y += deltaTime * this.player.g;
+              
+                this.player.angle = this.player.g  * 0.25;
 
                 this.emitter.emitY = this.player.y;
                 this.updateBlocks();
@@ -130,7 +142,7 @@
                     block.x = this.lastX + 50;
 
                     if (block.anchor.y === 0) {
-                        block.y = this.lastY + (250 + Math.random() * 150);
+                        block.y = this.lastY + (350 + Math.random() * 150);
                     } else {
                         block.y = this.lastY;
                     }
@@ -176,14 +188,6 @@
             explosion.anchor.set(0.5);
             this.time.events.removeAll();
             this.time.events.add(3000, this.onGameOver, this);
-        },
-
-        onInputDown: function () {
-            this.playerY = -2;
-        },
-
-        onInputUp: function () {
-            this.playerY = 2;
         },
 
         onGameOver: function () {

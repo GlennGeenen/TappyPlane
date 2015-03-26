@@ -9,7 +9,6 @@
   "dependencies": {},
 
   "devDependencies": {
-    "bower": "*",
     "gulp": "*",
     "gulp-util": "*",
     "gulp-concat": "*",
