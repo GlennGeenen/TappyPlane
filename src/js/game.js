@@ -5,8 +5,7 @@
         this.player = null;
         this.blocks = null;
         this.emitter = null;
-        this.lastX = 0;
-        this.lastY = 0;
+        this.point = null;
     }
 
     Game.prototype = {
@@ -14,6 +13,9 @@
         create: function () {
 
             this.gameOver = false;
+            this.gap = 350;
+            this.lastX = 0;
+            this.lastY = 0;
 
             this.add.sprite(0, 0, 'background');
 
@@ -27,7 +29,7 @@
         },
 
         createPlane: function () {
-            this.player = this.add.sprite(200, this.game.height * 0.5, 'plane');
+            this.player = this.add.sprite(400, 700, 'plane');
             this.player.anchor.set(0.5);
             this.player.animations.add('fly');
             this.player.animations.play('fly', 50, true);
@@ -49,27 +51,41 @@
         },
 
         createBlocks: function () {
+            
             this.blocks = this.add.group();
+            this.points = this.add.group();
 
+            var i;
+            var block;
+          
             this.lastX = 0;
-            this.lastY = 300 + Math.random() * 100;
+            this.lastY = 450;
 
-            for (var i = 0; i < 40; ++i) {
+            for (i = 0; i < 20; ++i) {
 
                 this.lastX = i * 50;
 
-                this.computeNextY();
-
-                if (i === 12) {
-                    this.player.y = this.lastY + 150;
-                }
-
-                var block = this.blocks.create(this.lastX, this.lastY, 'block');
+                block = this.blocks.create(this.lastX, this.lastY, 'block');
                 block.anchor.setTo(0.5, 1.0);
 
-                block = this.blocks.create(this.lastX, this.lastY + (350 + Math.random() * 150), 'block');
+                block = this.blocks.create(this.lastX, this.lastY + 400, 'block');
                 block.anchor.setTo(0.5, 0.0);
             }
+          
+            for (i = 0; i < 20; ++i) {
+
+                this.lastX = 1000 + i * 50;
+
+                this.computeNextY();
+
+                block = this.blocks.create(this.lastX, this.lastY, 'block');
+                block.anchor.setTo(0.5, 1.0);
+
+                block = this.blocks.create(this.lastX, this.lastY + (this.gap + Math.random() * 150), 'block');
+                block.anchor.setTo(0.5, 0.0);
+            }
+            
+            this.point = this.add.sprite(this.lastX, this.lastY + Math.random() * this.gap, 'gold');
 
         },
 
@@ -77,27 +93,24 @@
             this.score = 0;
             var style = {
                 font: '100px Arial',
-                fill: '#ffe200',
+                fill: '#265c69',
                 align: 'center'
             };
-            this.scoreText = this.add.text(20, 20, this.score, style);
+            this.scoreText = this.add.text(20, 20, 'Score: ' + this.score, style);
         },
 
         update: function () {
 
             if (!this.gameOver) {
               
-              
-              if(this.game.kinectbody) {
-                var joints = this.game.kinectbody.Joints;
-                
-                if(joints.HandLeft.Position.Z > joints.SpineMid.Position.Z - 0.3 && joints.HandRight.Position.Z > joints.SpineMid.Position.Z - 0.3) {
-                  this.player.g  = -30;
-                } else {
-                  this.player.g  = 30;
+                if(this.game.kinectbody) {
+                  var joints = this.game.kinectbody.Joints;
+
+                  var ldif = joints.SpineMid.Position.Z - joints.HandLeft.Position.Z - 0.3;
+                  var rdif = joints.SpineMid.Position.Z - joints.HandRight.Position.Z - 0.3;
+
+                  this.player.g = (ldif + rdif) * 150;
                 }
-                
-              }
               
                 var deltaTime = this.time.elapsed / 1000;
               
@@ -106,7 +119,9 @@
                 this.player.angle = this.player.g  * 0.25;
 
                 this.emitter.emitY = this.player.y;
+                
                 this.updateBlocks();
+                this.updateBonus();
             }
         },
 
@@ -138,14 +153,20 @@
                         increaseX = true;
                         this.computeNextY();
                     }
+                    
+                    if(!this.point.alive) {
+                        this.point.x = this.lastX + 50;
+                        this.point.y = this.lastY + Math.random() * this.gap;
+                        this.point.revive();
+                    }
 
                     block.x = this.lastX + 50;
-
                     if (block.anchor.y === 0) {
-                        block.y = this.lastY + (350 + Math.random() * 150);
+                        block.y = this.lastY + (this.gap + Math.random() * 150);
                     } else {
                         block.y = this.lastY;
                     }
+                    
                 } else {
                     var distx = this.player.x - block.x;
 
@@ -168,9 +189,62 @@
                 this.onCollision();
             }
         },
+        
+        updateBonus: function () {
+            
+            if(this.point.alive) {
+                this.point.x -= 2;
+                if(this.point.x < -50) {
+                    this.point.alive = false;
+                } else if(this.point.x < 450 && this.point.x > 350) {
+                    
+                    if (Math.abs(this.point.y - this.player.y) < 60) {
+                        
+                        this.score += 100;
+                        this.point.kill();
+                        
+                        var sprite = this.add.sprite(this.point.x, this.point.y, 'bonus');
+                        sprite.anchor.set(0.5);
+                        
+                        var tw = this.add.tween(sprite);
+                        tw.to({
+                            x: this.point.x + 350,
+                            y: this.point.y - 350
+                        }, 5000, Phaser.Easing.Linear.None, true);
+                        
+                        tw = this.add.tween(sprite);
+                        tw.to( { alpha: 0 }, 5000, Phaser.Easing.Linear.None, true);
+                        tw.onComplete.add(function() {
+                            sprite.destroy();
+                        });
+                        
+                    } 
+
+                }
+                
+            }
+            
+        },
 
         updateScore: function () {
-            this.scoreText.text = ++this.score;
+            
+            if(this.time.totalElapsedSeconds() > 120) {
+                this.gap = 100;
+            }
+            else if(this.time.totalElapsedSeconds() > 90) {
+                this.gap = 150;
+            }
+            else if(this.time.totalElapsedSeconds() > 60) {
+                this.gap = 200;
+            }
+            else if(this.time.totalElapsedSeconds() > 45) {
+                this.gap = 250;
+            }
+            else if(this.time.totalElapsedSeconds() > 30) {
+                this.gap = 300;
+            }
+            
+            this.scoreText.text = 'Score: ' + (this.score+=2);
         },
 
         onCollision: function () {

@@ -32,31 +32,37 @@
 
             var text = this.add.text(this.game.width * 0.5, 200, 'Handen omhoog om te starten', {
                 font: '42px Arial',
-                fill: '#ffffff',
+                fill: '#5fa7b9',
                 align: 'center'
             });
             text.anchor.set(0.5);
 
-            text = this.add.text(this.game.width * 0.5, 100, 'TappyPlane', {
+            text = this.add.text(this.game.width * 0.5, 100, 'Vliegeraar', {
                 font: '128px Arial',
-                fill: '#ffe200',
+                fill: '#265c69',
                 align: 'center'
             });
             text.anchor.set(0.5);
 
             text = this.add.text(this.game.width * 0.333, 500, 'Hoogste Score', {
                 font: '48px Arial',
-                fill: '#ffffff',
+                fill: '#265c69',
                 align: 'center'
             });
             text.anchor.set(0.5);
 
             text = this.add.text(this.game.width * 0.666, 500, 'Mijn Score', {
                 font: '48px Arial',
-                fill: '#ffffff',
+                fill: '#265c69',
                 align: 'center'
             });
             text.anchor.set(0.5);
+          
+            this.add.sprite(this.game.width * 0.5, this.game.height, 'start').anchor.setTo(0.5,1);
+          
+            this.add.sprite(this.game.width * 0.25, this.game.height, 'boven').anchor.setTo(0.5,1);
+            this.add.sprite(this.game.width * 0.75, this.game.height, 'beneden').anchor.setTo(0.5,1);
+          
         },
 
         addScore: function () {
@@ -71,7 +77,7 @@
 
             var style = {
                 font: '64px Arial',
-                fill: '#ffffff',
+                fill: '#5fa7b9',
                 align: 'center'
             };
 

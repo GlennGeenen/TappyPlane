@@ -20,9 +20,17 @@
 
         loadResources: function () {
             this.load.image('background', 'assets/background.png');
+          
+            this.load.image('start', 'assets/start.png');
+            this.load.image('boven', 'assets/boven.png');
+            this.load.image('beneden', 'assets/beneden.png');
+          
             this.load.image('block', 'assets/block.png');
             this.load.image('puffSmall', 'assets/puffSmall.png');
             this.load.image('explosion', 'assets/explosion.png');
+            this.load.image('gold', 'assets/starGold.png');
+            this.load.image('bonus', 'assets/bonus.png');
+          
             this.load.spritesheet('plane', 'assets/plane.png', 88, 73, 3);
         },
 
